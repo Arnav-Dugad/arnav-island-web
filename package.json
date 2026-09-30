@@ -1,0 +1,33 @@
+{
+  "name": "arnav-island-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Arnav Island for iPhone and the web: your PC's island in your hand, as a home-screen app.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "wrangler pages dev dist",
+    "test": "node test/run.mjs interop",
+    "icons": "python scripts/icons.py",
+    "art": "python scripts/art.py",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name arnav-island"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@preact/signals": "^2.11.3",
+    "jsqr": "^1.4.0",
+    "preact": "^10.29.8"
+  },
+  "devDependencies": {
+    "@material-design-icons/svg": "^0.14.15",
+    "@preact/preset-vite": "^2.10.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "wrangler": "^4.144.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Arnav-Dugad/arnav-island-web"
+  }
+}
