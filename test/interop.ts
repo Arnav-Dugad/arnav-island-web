@@ -170,7 +170,8 @@ async function main() {
     return null;
   };
   say(`page ${webId} 0.25 https://example.org/read A page to read`);
-  await expect(/^OK page/, 10_000); await sleep(4000);
+  await expect(/^OK page/, 10_000);
+  for (let i = 0; i < 100 && !queries.includes(Proto.QUERY_PAGE); i++) await sleep(200);
   check(queries.includes(Proto.QUERY_PAGE), 'a page from the PC, where it was scrolled to');
 
   // The trackpad.
@@ -189,7 +190,11 @@ async function main() {
     let frames = 0, keys = 0, bytesIn = 0; const until = Date.now() + 15_000;
     while (Date.now() < until && frames < 20) { const f = await ss.receive(1000); if (f && f[0] === Proto.SCREEN_VIDEO) { frames++; if (f[1] & 1) keys++; bytesIn += f.length; if (frames % 5 === 0) await ss.send(new Bytes().u8(Proto.SCREEN_FEEDBACK).u32(frames).u16(8).u32(3000).u8(30).build()); } }
     check(frames >= 5 && keys >= 1, `${frames} frames arrived (${keys} key), ${Math.round(bytesIn / 1024)} KB`);
-    await ss.send(Uint8Array.of(Proto.SCREEN_INPUT, ...Frames.point(0.5, 0.5))); check(!!(await expect(/^MIRROR input 65/, 10_000)), 'a tap on the PC\'s screen arrives');
+    const tapAt = Date.now(); await ss.send(Uint8Array.of(Proto.SCREEN_INPUT, ...Frames.point(0.5, 0.5)));
+    // Frames keep coming meanwhile (as they do while it shows), so the session stays read.
+    let tapped: RegExpMatchArray | null | undefined; void expect(/^MIRROR input 65/, 20_000).then((m) => { tapped = m; });
+    while (tapped === undefined && Date.now() - tapAt < 20_000) await ss.receive(200);
+    check(!!tapped, `a tap on the PC's screen arrives (${((Date.now() - tapAt) / 1000).toFixed(1)} s)`);
     await ss.send(Uint8Array.of(Proto.SCREEN_STOP)); ss.close();
     check(!!(await expect(/^MIRROR ended/, 15_000)), 'the screen ends cleanly');
   }
