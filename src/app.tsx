@@ -111,7 +111,7 @@ function Main() {
   // ---- links into the app: pairing, sharing (from Shortcuts), and actions ----
   useEffect(() => {
     const handle = () => {
-      const full = location.pathname + location.hash;
+      const full = location.pathname + location.search + location.hash;
       const pairMatch = full.match(/\/pair\/([^?#]+)(\?[^#]*)?/);
       if (pairMatch) { const l = pairLink('arnavisland://pair/' + pairMatch[1] + (pairMatch[2] ?? '')); history.replaceState(null, '', '/'); if (l) { pairWithCode(l.code, l.key); setPairing('finding'); } else say({ kind: 'failed', title: 'That link can’t pair', detail: 'Scan the QR code on your PC’s island again' }); return; }
       const share = location.hash.match(/^#\/share\?(.*)$/);
